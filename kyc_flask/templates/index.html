@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI KYC Compliance</title>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #162032 100%);
+      border-bottom: 1px solid #2d3748;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    header .logo {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header .subtitle {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Cards ─────────────────────────────────────────────────── */
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .card h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Upload panel ──────────────────────────────────────────── */
+    .drop-zone {
+      border: 2px dashed #334155;
+      border-radius: 10px;
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #60a5fa;
+      background: #1e293b;
+    }
+    .drop-zone .icon { font-size: 2.5rem; margin-bottom: .5rem; }
+    .drop-zone p   { color: #64748b; font-size: .88rem; }
+    .drop-zone input[type=file] { display: none; }
+
+    #preview-wrap {
+      margin-top: 1rem;
+      display: none;
+      position: relative;
+    }
+    #preview-img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #2d3748;
+    }
+    #remove-btn {
+      position: absolute;
+      top: 6px; right: 6px;
+      background: rgba(0,0,0,.65);
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      font-size: 1rem;
+      line-height: 26px;
+      text-align: center;
+    }
+
+    #analyse-btn {
+      margin-top: 1rem;
+      width: 100%;
+      padding: .75rem;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    #analyse-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Results panel ─────────────────────────────────────────── */
+    #results-card { display: none; }
+
+    /* verdict banner */
+    .verdict {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .9rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+    .verdict.safe       { background: #052e16; color: #4ade80; }
+    .verdict.suspicious { background: #450a0a; color: #f87171; }
+    .verdict.negative   { background: #1c1917; color: #a8a29e; }
+    .verdict .badge { font-size: 1.4rem; }
+
+    /* info grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem 1.2rem;
+      margin-bottom: 1.25rem;
+    }
+    .info-item label {
+      display: block;
+      font-size: .72rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 2px;
+    }
+    .info-item span {
+      font-size: .9rem;
+      color: #e2e8f0;
+      word-break: break-all;
+    }
+
+    /* OCR fields */
+    .ocr-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .875rem;
+      margin-bottom: 1.25rem;
+    }
+    .ocr-table th {
+      text-align: left;
+      padding: .4rem .6rem;
+      color: #64748b;
+      font-weight: 500;
+      border-bottom: 1px solid #2d3748;
+    }
+    .ocr-table td {
+      padding: .45rem .6rem;
+      border-bottom: 1px solid #1e293b;
+      color: #cbd5e1;
+    }
+
+    /* prob bars */
+    .prob-row {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      margin-bottom: .4rem;
+      font-size: .82rem;
+    }
+    .prob-row .label { width: 80px; color: #94a3b8; }
+    .prob-bar-wrap {
+      flex: 1;
+      background: #1e293b;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .prob-bar { height: 8px; border-radius: 999px; transition: width .5s; }
+
+    /* similar records */
+    .sim-record {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      margin-bottom: .6rem;
+      font-size: .82rem;
+    }
+    .sim-record .sim-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: .35rem;
+    }
+    .sim-record .rank { color: #60a5fa; font-weight: 600; }
+    .sim-score {
+      background: #1e293b;
+      padding: 1px 8px;
+      border-radius: 999px;
+      color: #a78bfa;
+      font-size: .78rem;
+    }
+    .sim-record .fields { color: #94a3b8; }
+    .sim-record .fields span { color: #cbd5e1; }
+
+    /* spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* error box */
+    .error-box {
+      background: #450a0a;
+      border: 1px solid #7f1d1d;
+      border-radius: 8px;
+      padding: .85rem 1rem;
+      color: #fca5a5;
+      font-size: .875rem;
+    }
+
+    @media (max-width: 760px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">⚖️ KYC Compliance AI</div>
+    <div class="subtitle">Aadhaar · PAN · Passport anomaly detection powered by GNN</div>
+  </div>
+</header>
+
+<main>
+  <!-- ── Upload panel ── -->
+  <section class="card" id="upload-card">
+    <h2>Upload Document</h2>
+
+    <div class="drop-zone" id="drop-zone">
+      <div class="icon">📄</div>
+      <p>Drag &amp; drop an image here<br>or click to browse</p>
+      <p style="margin-top:.4rem;font-size:.78rem">JPG · PNG · WEBP (max 16 MB)</p>
+      <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" />
+    </div>
+
+    <div id="preview-wrap">
+      <img id="preview-img" alt="Preview" />
+      <button id="remove-btn" title="Remove">✕</button>
+    </div>
+
+    <button id="analyse-btn" disabled>Analyse Document</button>
+  </section>
+
+  <!-- ── Results panel ── -->
+  <section class="card" id="results-card">
+    <h2>Analysis Results</h2>
+    <div id="results-body"></div>
+  </section>
+</main>
+
+<script>
+/* ── State ─────────────────────────────────────────────────────────────────── */
+let selectedFile = null;
+
+/* ── Elements ──────────────────────────────────────────────────────────────── */
+const dropZone    = document.getElementById("drop-zone");
+const fileInput   = document.getElementById("file-input");
+const previewWrap = document.getElementById("preview-wrap");
+const previewImg  = document.getElementById("preview-img");
+const removeBtn   = document.getElementById("remove-btn");
+const analyseBtn  = document.getElementById("analyse-btn");
+const resultsCard = document.getElementById("results-card");
+const resultsBody = document.getElementById("results-body");
+
+/* ── Drop zone ─────────────────────────────────────────────────────────────── */
+dropZone.addEventListener("click", () => fileInput.click());
+
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault();
+  dropZone.classList.remove("dragover");
+  if (e.dataTransfer.files.length) setFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener("change", () => {
+  if (fileInput.files.length) setFile(fileInput.files[0]);
+});
+
+removeBtn.addEventListener("click", () => {
+  selectedFile = null;
+  previewWrap.style.display = "none";
+  fileInput.value = "";
+  analyseBtn.disabled = true;
+  clearResults();
+});
+
+function setFile(file) {
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    previewImg.src = e.target.result;
+    previewWrap.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+  analyseBtn.disabled = false;
+  clearResults();
+}
+
+/* ── Analyse ───────────────────────────────────────────────────────────────── */
+analyseBtn.addEventListener("click", async () => {
+  if (!selectedFile) return;
+
+  analyseBtn.disabled = true;
+  analyseBtn.innerHTML = '<span class="spinner"></span> Analysing…';
+  resultsCard.style.display = "block";
+  resultsBody.innerHTML = `<p style="color:#64748b;font-size:.875rem">Running classifier and GNN models…</p>`;
+
+  const fd = new FormData();
+  fd.append("image", selectedFile);
+
+  try {
+    const res  = await fetch("/api/kyc", { method: "POST", body: fd });
+    const data = await res.json();
+
+    if (!res.ok) {
+      resultsBody.innerHTML = `<div class="error-box">⚠ ${data.error || "Unknown error"}</div>`;
+    } else {
+      renderResults(data);
+    }
+  } catch (err) {
+    resultsBody.innerHTML = `<div class="error-box">⚠ Network error: ${err.message}</div>`;
+  } finally {
+    analyseBtn.disabled = false;
+    analyseBtn.innerHTML = "Analyse Document";
+  }
+});
+
+/* ── Render ────────────────────────────────────────────────────────────────── */
+function clearResults() {
+  resultsCard.style.display = "none";
+  resultsBody.innerHTML = "";
+}
+
+function renderResults(d) {
+  let html = "";
+
+  /* verdict */
+  if (d.document_type === "Negative") {
+    html += `<div class="verdict negative"><span class="badge">📭</span>Not a KYC document</div>`;
+  } else if (d.is_suspicious) {
+    html += `<div class="verdict suspicious"><span class="badge">🚨</span>Suspicious — possible anomaly detected</div>`;
+  } else {
+    html += `<div class="verdict safe"><span class="badge">✅</span>Record appears normal</div>`;
+  }
+
+  /* info grid */
+  html += `<div class="info-grid">
+    <div class="info-item"><label>Document type</label><span>${d.document_type}</span></div>
+    <div class="info-item"><label>Classifier confidence</label><span>${(d.confidence * 100).toFixed(1)}%</span></div>`;
+
+  if (d.anomaly_score !== null) {
+    html += `
+    <div class="info-item"><label>Anomaly score</label><span>${d.anomaly_score.toFixed(5)}</span></div>
+    <div class="info-item"><label>Threshold (μ+3σ)</label><span>${d.threshold.toFixed(5)}</span></div>`;
+  }
+  html += `</div>`;
+
+  /* classifier probabilities */
+  if (d.all_probs) {
+    html += `<h2 style="margin-bottom:.6rem">Classifier Probabilities</h2>`;
+    const colours = { Aadhaar: "#3b82f6", PAN: "#10b981", Passport: "#a78bfa", Negative: "#64748b" };
+    for (const [cls, prob] of Object.entries(d.all_probs)) {
+      html += `
+      <div class="prob-row">
+        <span class="label">${cls}</span>
+        <div class="prob-bar-wrap">
+          <div class="prob-bar" style="width:${(prob*100).toFixed(1)}%;background:${colours[cls]||'#60a5fa'}"></div>
+        </div>
+        <span style="width:46px;text-align:right;color:#94a3b8">${(prob*100).toFixed(1)}%</span>
+      </div>`;
+    }
+  }
+
+  /* OCR fields */
+  if (d.ocr_fields && Object.keys(d.ocr_fields).length) {
+    html += `<h2 style="margin:1.1rem 0 .6rem">Extracted Fields (OCR)</h2>
+    <table class="ocr-table"><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody>`;
+    for (const [k, v] of Object.entries(d.ocr_fields)) {
+      html += `<tr><td>${k}</td><td>${v || '<em style="color:#475569">—</em>'}</td></tr>`;
+    }
+    html += `</tbody></table>`;
+  }
+
+/* forgery result */
+  if (d.forgery) {
+    const fg = d.forgery;
+    if (fg.verdict === "UNAVAILABLE") {
+      html += `<div class="verdict negative" style="margin-top:1rem">
+        🔍 Forgery detection unavailable — no master template loaded for ${d.document_type}
+      </div>`;
+    } else if (fg.verdict === "ERROR") {
+      html += `<div class="verdict negative" style="margin-top:1rem">⚠ Forgery check error</div>`;
+    } else {
+      const fgClass = fg.is_forged ? "suspicious" : "safe";
+      const fgIcon  = fg.is_forged ? "🛑" : "✅";
+      const fgLabel = fg.is_forged ? "FORGED — structural layout deviates from master template"
+                                   : "AUTHENTIC — structural layout matches master template";
+      html += `
+      <h2 style="margin:1.1rem 0 .6rem">Forgery Detection</h2>
+      <div class="verdict ${fgClass}">
+        <span class="badge">${fgIcon}</span>${fgLabel}
+      </div>
+      <div class="info-grid" style="margin-top:.75rem">
+        <div class="info-item">
+          <label>Distance Score</label>
+          <span>${fg.distance_score?.toFixed(6) ?? '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>Forgery Threshold</label>
+          <span>${fg.threshold?.toFixed(6) ?? '—'}</span>
+        </div>
+      </div>`;
+    }
+  }
+
+
+  /* similar records */
+  if (d.similar_records && d.similar_records.length) {
+    html += `<h2 style="margin:1.1rem 0 .6rem">Top-${d.similar_records.length} Similar Records</h2>`;
+    for (const s of d.similar_records) {
+      html += `<div class="sim-record">
+        <div class="sim-header">
+          <span class="rank">#${s.rank} · Node ${s.node_id}</span>
+          <span class="sim-score">Similarity ${(s.similarity * 100).toFixed(1)}%</span>
+        </div>
+        <div class="fields">${formatRecord(s.record)}</div>
+      </div>`;
+    }
+  }
+
+  resultsBody.innerHTML = html;
+}
+
+function formatRecord(rec) {
+  return Object.entries(rec)
+    .filter(([k]) => !k.startsWith("_"))
+    .map(([k, v]) => `${k}: <span>${v || "—"}</span>`)
+    .join(" &nbsp;·&nbsp; ");
+}
+</script>
+</body>
+</html>

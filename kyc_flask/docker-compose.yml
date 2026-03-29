@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  kyc-api:
+    build: .
+    image: kyc-compliance-api:latest
+    container_name: kyc_api
+    ports:
+      - "5000:5000"
+    environment:
+      - KYC_DEBUG=0
+      - KYC_MAX_MB=16
+    volumes:
+      # Mount pre-trained models at runtime — keep them outside the image
+      - ./models:/app/models:ro
+      # Writable uploads scratch dir
+      - kyc_uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s   # Models take ~30s to load on first start
+
+volumes:
+  kyc_uploads:

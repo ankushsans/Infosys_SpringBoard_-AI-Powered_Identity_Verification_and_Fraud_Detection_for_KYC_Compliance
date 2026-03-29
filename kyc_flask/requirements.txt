@@ -1,0 +1,30 @@
+# ── Web framework ─────────────────────────────────────────
+flask>=3.0
+werkzeug>=3.0
+
+# ── Deep learning — classifier ────────────────────────────
+tensorflow>=2.15          # EfficientNetV2B0 (best_model.keras)
+
+# ── Deep learning — GNN ───────────────────────────────────
+torch>=2.1
+torch-geometric>=2.5      # GCNConv
+# torch-scatter and torch-sparse are auto-installed by torch-geometric
+
+# ── NLP / embeddings ──────────────────────────────────────
+sentence-transformers>=2.7  # all-MiniLM-L6-v2
+
+# ── OCR ───────────────────────────────────────────────────
+openbharatocr             # Aadhaar + PAN OCR
+pytesseract               # Passport MRZ (needs tesseract binary)
+Pillow>=10.0
+
+# ── Optional — better passport MRZ parsing ─────────────────
+# mrz                     # pip install mrz  (uncomment if available)
+
+# ── ML utils ──────────────────────────────────────────────
+scikit-learn>=1.3
+numpy>=1.24
+
+# ── Misc ──────────────────────────────────────────────────
+networkx>=3.2
+python-Levenshtein>=0.23

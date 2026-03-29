@@ -1,0 +1,199 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* BACKGROUND */
+
+.landing-container{
+  height:100vh;
+  width:100%;
+  background: radial-gradient(circle at top,#0f172a,#020617);
+  color:white;
+  overflow:hidden;
+}
+
+
+/* NAVBAR */
+
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 60px;
+  animation: fadeDown 1s ease;
+}
+
+.logo{
+  font-size:24px;
+  font-weight:bold;
+  color:#38bdf8;
+}
+
+.nav-links{
+  display:flex;
+  gap:40px;
+  list-style:none;
+  color:#cbd5f5;
+}
+
+.nav-links li{
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.nav-links li:hover{
+  color:#38bdf8;
+}
+
+.start-btn{
+  background:#06b6d4;
+  border:none;
+  padding:10px 20px;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.start-btn:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 15px #06b6d4;
+}
+
+
+/* HERO */
+
+.hero{
+  text-align:center;
+  margin-top:120px;
+  padding:0 20px;
+  animation: fadeUp 1.5s ease;
+}
+
+
+/* BADGE */
+
+.badge{
+  display:inline-block;
+  padding:6px 14px;
+  border:1px solid #22d3ee;
+  border-radius:20px;
+  color:#22d3ee;
+  margin-bottom:20px;
+  font-size:14px;
+
+  animation: floatBadge 3s infinite ease-in-out;
+}
+
+
+/* TITLE */
+
+.hero-title{
+  font-size:64px;
+  font-weight:bold;
+  line-height:1.2;
+  color:white;
+}
+
+.hero-title span{
+  background: linear-gradient(90deg,#06b6d4,#38bdf8);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+
+/* DESCRIPTION */
+
+.hero-desc{
+  margin-top:20px;
+  color:#94a3b8;
+  font-size:18px;
+  max-width:700px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+
+/* BUTTONS */
+
+.hero-buttons{
+  margin-top:40px;
+  display:flex;
+  justify-content:center;
+  gap:20px;
+}
+
+.verify-btn{
+  background:#06b6d4;
+  border:none;
+  padding:14px 26px;
+  font-size:16px;
+  border-radius:8px;
+  cursor:pointer;
+  color:white;
+  transition:0.3s;
+}
+
+.verify-btn:hover{
+  transform:scale(1.08);
+  box-shadow:0 0 20px #06b6d4;
+}
+
+.learn-btn{
+  background:transparent;
+  border:1px solid #475569;
+  padding:14px 26px;
+  font-size:16px;
+  border-radius:8px;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.learn-btn:hover{
+  border-color:#38bdf8;
+  color:#38bdf8;
+}
+
+
+/* ANIMATIONS */
+
+@keyframes fadeUp{
+  from{
+    opacity:0;
+    transform:translateY(40px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes fadeDown{
+  from{
+    opacity:0;
+    transform:translateY(-40px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes floatBadge{
+  0%{
+    transform:translateY(0);
+  }
+  50%{
+    transform:translateY(-8px);
+  }
+  100%{
+    transform:translateY(0);
+  }
+}
