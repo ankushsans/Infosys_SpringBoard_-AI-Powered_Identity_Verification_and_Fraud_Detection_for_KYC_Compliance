@@ -83,6 +83,9 @@ To run the ML service interface:
 - [x] Document Upload & Storage Logic
 - [x] Batch Classification of ID Documents
 - [x] History Tracking Dashboard
-- [ ] Live ML Service Endpoint Integration
+- [x] Live ML Service Endpoint Integration
 - [ ] Automated Address Matching Logic
-- [ ] Forgery Detection Module
+- [x] Forgery Detection Module
+
+## Link to Agile Document
+- [Link to Agile Document](https://docs.google.com/spreadsheets/d/12RmH3lhQ_eNGr8RWE6xr6Xr4JvcVGyF6/edit?usp=sharing&ouid=115124744229541850322&rtpof=true&sd=true)
