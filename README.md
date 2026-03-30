@@ -34,8 +34,9 @@ An end-to-end AI system for identity document verification, address validation, 
 
 ### 2. Backend Setup
 ```bash
-cd backend
-npm install
+cd kyc_flask
+uv sync
+
 ```
 Create a `.env` file in the `backend/` directory:
 ```env
@@ -46,7 +47,7 @@ NODE_ENV=development
 ```
 Start the backend server:
 ```bash
-npm run dev
+uv run app.py
 ```
 
 ### 3. Frontend Setup
